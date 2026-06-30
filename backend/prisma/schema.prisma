@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Sighting {
+  id            String         @id @default(cuid())
+  lat           Float
+  lng           Float
+  createdAt     DateTime       @default(now())
+  confirmations Confirmation[]
+}
+
+model Confirmation {
+  id         String   @id @default(cuid())
+  sightingId String
+  sighting   Sighting @relation(fields: [sightingId], references: [id])
+  createdAt  DateTime @default(now())
+}
