@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AboutCard } from "./AboutCard";
 import { confirmSighting, createSighting, getCurrentSighting, getWeather } from "./api";
 import { BottomSheet } from "./BottomSheet";
@@ -6,6 +6,7 @@ import { DatenschutzCard } from "./DatenschutzCard";
 import { Header } from "./Header";
 import { ImpressumCard } from "./ImpressumCard";
 import { hasSeenIntro, markIntroSeen } from "./intro";
+import { LocationToggle } from "./LocationToggle";
 import { DEFAULT_CENTER, MapView } from "./MapView";
 import type { CurrentSighting, OverlayView, ParkWeather, ViewState } from "./types";
 
@@ -18,11 +19,13 @@ function App() {
   const [view, setView] = useState<ViewState>("unknown");
   const [weather, setWeather] = useState<ParkWeather | null>(null);
   const [userPosition, setUserPosition] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationEnabled, setLocationEnabled] = useState(false);
   const [pendingPin, setPendingPin] = useState<{ lat: number; lng: number } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [overlay, setOverlay] = useState<OverlayView>(null);
+  const watchIdRef = useRef<number | null>(null);
 
   const refreshSighting = useCallback(async () => {
     const current = await getCurrentSighting();
@@ -39,6 +42,35 @@ function App() {
       setOverlay("about");
     }
   }, [refreshSighting]);
+
+  const handleLocationToggle = useCallback((enabled: boolean) => {
+    if (!navigator.geolocation) return;
+    if (enabled) {
+      watchIdRef.current = navigator.geolocation.watchPosition(
+        (position) => {
+          setUserPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
+        },
+        () => setLocationEnabled(false),
+        { enableHighAccuracy: true },
+      );
+      setLocationEnabled(true);
+    } else {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+      setUserPosition(null);
+      setLocationEnabled(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+    };
+  }, []);
 
   const handleConfirm = useCallback(async () => {
     if (!sighting) return;
@@ -121,6 +153,9 @@ function App() {
           setOverlay(target);
         }}
       />
+      {overlay === null && (
+        <LocationToggle enabled={locationEnabled} onToggle={handleLocationToggle} />
+      )}
       {overlay === "about" && (
         <AboutCard
           onClose={() => {
