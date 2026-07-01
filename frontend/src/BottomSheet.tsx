@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import arrowLeftIcon from "./assets/arrow-left.svg";
 import schafIcon from "./assets/schaf-icon.svg";
 import sunIcon from "./assets/sun.svg";
@@ -62,29 +63,55 @@ function BackButton({ onClick }: { onClick: () => void }) {
   );
 }
 
+function CollapseButton({ collapsed, onClick }: { collapsed: boolean; onClick: () => void }) {
+  return (
+    <button
+      className={`sheet__collapse${collapsed ? " sheet__collapse--centered" : ""}`}
+      onClick={onClick}
+      aria-label={collapsed ? "Ausklappen" : "Einklappen"}
+    >
+      <svg width="28" height="28" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {collapsed
+          ? <path d="M5 8l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          : <path d="M5 12l5-5 5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        }
+      </svg>
+    </button>
+  );
+}
+
 export function BottomSheet(props: BottomSheetProps) {
   const { view, sighting, weather } = props;
+  const [collapsed, setCollapsed] = useState(false);
+
+  // Reset to expanded whenever the view changes
+  useEffect(() => { setCollapsed(false); }, [view]);
+
+  const collapsible = view === "known" || view === "uncertain" || view === "unknown";
 
   if (view === "known" && sighting) {
     return (
       <div className="sheet">
-        <WeatherBadge weather={weather} />
+        {collapsible && <CollapseButton collapsed={collapsed} onClick={() => setCollapsed((c) => !c)} />}
+        {!collapsed && <WeatherBadge weather={weather} />}
         <div className="sheet__status">
           <div className="sheet__status-row">
             <img className="sheet__icon" src={schafIcon} alt="" />
             <p className="sheet__title">Schaf Position bestätigt.</p>
           </div>
-          <p className="sheet__subtitle">{formatConfirmCount(sighting.confirmCount)}</p>
+          {!collapsed && <p className="sheet__subtitle">{formatConfirmCount(sighting.confirmCount)}</p>}
         </div>
-        <ErrorMessage error={props.error} />
-        <div className="sheet__buttons">
-          <button className="btn btn--accent" disabled={props.busy} onClick={props.onConfirm}>
-            Ja, stimmt noch
-          </button>
-          <button className="btn btn--accent-outline" disabled={props.busy} onClick={props.onNotThereAnymore}>
-            Stimmt nicht mehr
-          </button>
-        </div>
+        {!collapsed && <ErrorMessage error={props.error} />}
+        {!collapsed && (
+          <div className="sheet__buttons">
+            <button className="btn btn--accent" disabled={props.busy} onClick={props.onConfirm}>
+              Ja, stimmt noch
+            </button>
+            <button className="btn btn--accent-outline" disabled={props.busy} onClick={props.onNotThereAnymore}>
+              Stimmt nicht mehr
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -92,23 +119,26 @@ export function BottomSheet(props: BottomSheetProps) {
   if (view === "uncertain" && sighting) {
     return (
       <div className="sheet">
-        <WeatherBadge weather={weather} />
+        {collapsible && <CollapseButton collapsed={collapsed} onClick={() => setCollapsed((c) => !c)} />}
+        {!collapsed && <WeatherBadge weather={weather} />}
         <div className="sheet__status">
           <div className="sheet__status-row">
             <img className="sheet__icon sheet__icon--uncertain" src={schafIcon} alt="" />
             <p className="sheet__title">Schaf Position unsicher.</p>
           </div>
-          <p className="sheet__subtitle">{sighting.uncertainLabel}</p>
+          {!collapsed && <p className="sheet__subtitle">{sighting.uncertainLabel}</p>}
         </div>
-        <ErrorMessage error={props.error} />
-        <div className="sheet__buttons">
-          <button className="btn btn--accent" disabled={props.busy} onClick={props.onConfirm}>
-            Ja, stimmt noch
-          </button>
-          <button className="btn btn--accent-outline" disabled={props.busy} onClick={props.onWhereAreTheSheep}>
-            Neue Position melden
-          </button>
-        </div>
+        {!collapsed && <ErrorMessage error={props.error} />}
+        {!collapsed && (
+          <div className="sheet__buttons">
+            <button className="btn btn--accent" disabled={props.busy} onClick={props.onConfirm}>
+              Ja, stimmt noch
+            </button>
+            <button className="btn btn--accent-outline" disabled={props.busy} onClick={props.onWhereAreTheSheep}>
+              Neue Position melden
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -116,18 +146,21 @@ export function BottomSheet(props: BottomSheetProps) {
   if (view === "unknown") {
     return (
       <div className="sheet">
-        <WeatherBadge weather={weather} />
+        {collapsible && <CollapseButton collapsed={collapsed} onClick={() => setCollapsed((c) => !c)} />}
+        {!collapsed && <WeatherBadge weather={weather} />}
         <div className="sheet__status">
           <div className="sheet__status-row">
             <img className="sheet__icon sheet__icon--unknown" src={schafIcon} alt="" />
             <p className="sheet__title">Schaf Position unbekannt.</p>
           </div>
         </div>
-        <div className="sheet__buttons">
-          <button className="btn btn--accent" disabled={props.busy} onClick={props.onWhereAreTheSheep}>
-            Position angeben
-          </button>
-        </div>
+        {!collapsed && (
+          <div className="sheet__buttons">
+            <button className="btn btn--accent" disabled={props.busy} onClick={props.onWhereAreTheSheep}>
+              Position angeben
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -151,7 +184,6 @@ export function BottomSheet(props: BottomSheetProps) {
     return (
       <div className="sheet">
         <BackButton onClick={props.onBack} />
-        <WeatherBadge weather={weather} />
         <div className="sheet__status">
           <div className="sheet__status-row">
             <img className="sheet__icon" src={schafIcon} alt="" />
@@ -175,7 +207,6 @@ export function BottomSheet(props: BottomSheetProps) {
     return (
       <div className="sheet">
         <BackButton onClick={props.onCancelHandpick} />
-        <WeatherBadge weather={weather} />
         <div className="sheet__status">
           <div className="sheet__status-row">
             <img className="sheet__icon" src={schafIcon} alt="" />

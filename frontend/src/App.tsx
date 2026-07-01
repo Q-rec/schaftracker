@@ -7,6 +7,7 @@ import { Header } from "./Header";
 import { ImpressumCard } from "./ImpressumCard";
 import { hasSeenIntro, markIntroSeen } from "./intro";
 import { LocationToggle } from "./LocationToggle";
+import { SheepConfetti } from "./SheepConfetti";
 import { DEFAULT_CENTER, MapView } from "./MapView";
 import type { CurrentSighting, OverlayView, ParkWeather, ViewState } from "./types";
 
@@ -75,11 +76,22 @@ function App() {
 
   const handleConfirm = useCallback(async () => {
     if (!sighting) return;
+
+    const COOLDOWN_MS = 4 * 60 * 60 * 1000;
+    const lastConfirmed = Number(localStorage.getItem("sheep_last_confirmed") ?? 0);
+    const onCooldown = Date.now() - lastConfirmed < COOLDOWN_MS;
+
+    if (onCooldown) {
+      setView("thankyou");
+      return;
+    }
+
     setBusy(true);
     setError(null);
     try {
       const updated = await confirmSighting(sighting.id);
       setSighting(updated);
+      localStorage.setItem("sheep_last_confirmed", String(Date.now()));
       setView("thankyou");
     } catch {
       setError("Bestätigung konnte nicht gespeichert werden. Bitte versuch es noch einmal.");
@@ -156,6 +168,7 @@ function App() {
           setOverlay(target);
         }}
       />
+      <SheepConfetti active={overlay === null && view === "thankyou"} />
       {overlay === null && (
         <LocationToggle
           enabled={locationEnabled}

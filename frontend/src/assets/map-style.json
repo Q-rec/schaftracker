@@ -945,9 +945,9 @@
         "text-size": 14
       },
       "paint": {
-        "text-color": "hsl(0,0%,66%)",
-        "text-halo-color": "rgba(255,255,255,0.7)",
-        "text-halo-width": 1.5
+        "text-color": "rgba(255, 255, 255, 1)",
+        "text-halo-color": "rgba(255, 255, 255, 0.7)",
+        "text-halo-width": 0
       }
     },
     {
@@ -972,12 +972,13 @@
         "text-font": ["Noto Sans Italic"],
         "text-letter-spacing": 0.2,
         "text-max-width": 5,
-        "text-size": ["interpolate", ["linear"], ["zoom"], 0, 10, 8, 14]
+        "text-size": ["interpolate", ["linear"], ["zoom"], 0, 10, 8, 14],
+        "symbol-placement": "point"
       },
       "paint": {
-        "text-color": "#495e91",
+        "text-color": "rgba(255, 255, 255, 1)",
         "text-halo-color": "rgba(255,255,255,0.7)",
-        "text-halo-width": 1.5
+        "text-halo-width": 0
       }
     },
     {

@@ -6,6 +6,7 @@ import handpickCrosshairIcon from "./assets/handpick-crosshair.svg";
 import customMapStyle from "./assets/map-style.json";
 import positionTrackerIcon from "./assets/position-tracker.svg";
 import schafIcon from "./assets/schaf-icon.svg";
+import { playMaeh, playSaltoMaeh } from "./sheepSound";
 
 export const DEFAULT_CENTER = { lat: 52.52598031942008, lng: 13.29294426125757 };
 const PARK_BOUNDS: [LngLatLike, LngLatLike] = [
@@ -33,6 +34,8 @@ export function MapView({ initialCenter, sheepPosition, sheepUncertain, userPosi
   const onMapClickRef = useRef(onMapClick);
   onMapClickRef.current = onMapClick;
   const initialCenterRef = useRef(initialCenter);
+  const tapCountRef = useRef(0);
+  const tapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -67,10 +70,47 @@ export function MapView({ initialCenter, sheepPosition, sheepUncertain, userPosi
     sheepMarkerRef.current = null;
 
     if (sheepPosition) {
-      const el = document.createElement("img");
-      el.src = schafIcon;
-      el.className = sheepUncertain ? "marker marker--sheep marker--uncertain" : "marker marker--sheep";
-      sheepMarkerRef.current = new maplibregl.Marker({ element: el })
+      // Wrapper receives MapLibre's positioning transform — img is animated independently
+      const wrapper = document.createElement("div");
+      wrapper.className = sheepUncertain ? "marker--sheep marker--uncertain" : "marker--sheep";
+
+      const img = document.createElement("img");
+      img.src = schafIcon;
+      img.className = "marker--sheep-img";
+      wrapper.appendChild(img);
+
+      const ANIM_CLASSES = ["sheep-wiggle-1", "sheep-wiggle-2", "sheep-wiggle-3", "sheep-salto"];
+
+      wrapper.addEventListener("click", (e) => {
+        e.stopPropagation();
+
+        tapCountRef.current += 1;
+        const count = tapCountRef.current;
+
+        if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+        tapTimeoutRef.current = setTimeout(() => { tapCountRef.current = 0; }, 1500);
+
+        const isSalto = count >= 9;
+        const animClass = isSalto ? "sheep-salto"
+          : count >= 6 ? "sheep-wiggle-3"
+          : count >= 3 ? "sheep-wiggle-2"
+          : "sheep-wiggle-1";
+
+        if (isSalto) {
+          playSaltoMaeh();
+          tapCountRef.current = 0;
+          if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+        } else {
+          playMaeh(Math.min(count, 5));
+        }
+
+        img.classList.remove(...ANIM_CLASSES);
+        void img.offsetWidth; // force reflow to restart animation
+        img.classList.add(animClass);
+        img.addEventListener("animationend", () => img.classList.remove(animClass), { once: true });
+      });
+
+      sheepMarkerRef.current = new maplibregl.Marker({ element: wrapper })
         .setLngLat([sheepPosition.lng, sheepPosition.lat])
         .addTo(map);
     }
@@ -113,6 +153,11 @@ export function MapView({ initialCenter, sheepPosition, sheepUncertain, userPosi
   return (
     <div className="map-view">
       <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+      <div className="zoom-controls">
+        <button className="zoom-controls__btn" onClick={() => mapRef.current?.zoomIn()} aria-label="Vergrößern">+</button>
+        <div className="zoom-controls__divider" />
+        <button className="zoom-controls__btn" onClick={() => mapRef.current?.zoomOut()} aria-label="Verkleinern">−</button>
+      </div>
     </div>
   );
 }
