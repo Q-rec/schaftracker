@@ -62,9 +62,11 @@ export function DatenschutzCard({ onClose }: DatenschutzCardProps) {
         <ul>
           <li>OpenFreeMap (tiles.openfreemap.org) – Kartendarstellung</li>
           <li>Open-Meteo (api.open-meteo.com) – Wetterdaten</li>
-          <li>Google Fonts (fonts.gstatic.com / fonts.googleapis.com) – Schriftarten</li>
         </ul>
-        <p>Es gelten die jeweiligen Datenschutzbestimmungen dieser Anbieter.</p>
+        <p>
+          Schriftarten werden nicht von Drittanbietern geladen, sondern direkt von unserem Server ausgeliefert.
+        </p>
+        <p>Es gelten die jeweiligen Datenschutzbestimmungen der oben genannten Anbieter.</p>
 
         <p>
           <strong>7. Deine Rechte</strong>
