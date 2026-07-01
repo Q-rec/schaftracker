@@ -23,9 +23,10 @@ interface MapViewProps {
   userPosition: { lat: number; lng: number } | null;
   pendingPin: { lat: number; lng: number } | null;
   onMapClick?: (lat: number, lng: number) => void;
+  hideControls?: boolean;
 }
 
-export function MapView({ initialCenter, sheepPosition, sheepUncertain, userPosition, pendingPin, onMapClick }: MapViewProps) {
+export function MapView({ initialCenter, sheepPosition, sheepUncertain, userPosition, pendingPin, onMapClick, hideControls }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const sheepMarkerRef = useRef<maplibregl.Marker | null>(null);
@@ -153,11 +154,13 @@ export function MapView({ initialCenter, sheepPosition, sheepUncertain, userPosi
   return (
     <div className="map-view">
       <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
-      <div className="zoom-controls">
-        <button className="zoom-controls__btn" onClick={() => mapRef.current?.zoomIn()} aria-label="Vergrößern">+</button>
-        <div className="zoom-controls__divider" />
-        <button className="zoom-controls__btn" onClick={() => mapRef.current?.zoomOut()} aria-label="Verkleinern">−</button>
-      </div>
+      {!hideControls && (
+        <div className="zoom-controls">
+          <button className="zoom-controls__btn" onClick={() => mapRef.current?.zoomIn()} aria-label="Vergrößern">+</button>
+          <div className="zoom-controls__divider" />
+          <button className="zoom-controls__btn" onClick={() => mapRef.current?.zoomOut()} aria-label="Verkleinern">−</button>
+        </div>
+      )}
     </div>
   );
 }

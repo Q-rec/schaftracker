@@ -158,6 +158,7 @@ function App() {
           userPosition={userPosition}
           pendingPin={view === "handpick" ? pendingPin : null}
           onMapClick={view === "handpick" ? (lat, lng) => setPendingPin({ lat, lng }) : undefined}
+          hideControls={overlay !== null}
         />
       )}
       <Header

@@ -17,14 +17,14 @@ export function AboutCard({ onClose }: AboutCardProps) {
       </div>
       <p className="about-card__text">
         Diese Website ist ein Herzensprojekt eines Charlottenburgers.{"\n\n"}
-        Ich liebe die Schafe im Schlosspark Charlottenburg, möchte aber nicht so lange suchen und verlasse mich auf
-        euch, damit wir immer wissen, wo die Schafe heute grasen.{"\n\n"}
-        Dieses Projekt ist kostenlos, ohne Werbung und nur da, weil ich und mein kleiner Sohn es lieben die Schafe
+        Ich liebe die Schafe im Schlosspark Charlottenburg, möchte sie aber nicht jedes Mal erst suchen müssen und
+        verlasse mich auf euch, damit wir gemeinsam immer wissen, wo die Schafe heute grasen.{"\n\n"}
+        Dieses Projekt ist kostenlos, ohne Werbung und nur da, weil mein kleiner Sohn und ich es lieben, die Schafe
         anzuschauen.
       </p>
       <div className="sheet__buttons">
         <button className="btn btn--accent" onClick={onClose}>
-          los gehts
+          Los geht's
         </button>
       </div>
     </div>
