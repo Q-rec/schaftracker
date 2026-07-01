@@ -25,6 +25,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [overlay, setOverlay] = useState<OverlayView>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const watchIdRef = useRef<number | null>(null);
 
   const refreshSighting = useCallback(async () => {
@@ -148,13 +149,19 @@ function App() {
         />
       )}
       <Header
+        menuOpen={menuOpen}
+        onMenuToggle={() => setMenuOpen((o) => !o)}
         onNavigate={(target) => {
           markIntroSeen();
           setOverlay(target);
         }}
       />
       {overlay === null && (
-        <LocationToggle enabled={locationEnabled} onToggle={handleLocationToggle} />
+        <LocationToggle
+          enabled={locationEnabled}
+          onToggle={handleLocationToggle}
+          menuOpen={menuOpen}
+        />
       )}
       {overlay === "about" && (
         <AboutCard

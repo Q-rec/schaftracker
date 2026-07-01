@@ -1,12 +1,13 @@
 interface LocationToggleProps {
   enabled: boolean;
   onToggle: (enabled: boolean) => void;
+  menuOpen?: boolean;
 }
 
-export function LocationToggle({ enabled, onToggle }: LocationToggleProps) {
+export function LocationToggle({ enabled, onToggle, menuOpen }: LocationToggleProps) {
   return (
     <button
-      className={`location-toggle${enabled ? " location-toggle--on" : ""}`}
+      className={`location-toggle${enabled ? " location-toggle--on" : ""}${menuOpen ? " location-toggle--shifted" : ""}`}
       onClick={() => onToggle(!enabled)}
       aria-pressed={enabled}
     >
