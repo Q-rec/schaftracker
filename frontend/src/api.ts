@@ -1,4 +1,4 @@
-import type { CurrentSighting, ParkWeather } from "./types";
+import type { CurrentSighting } from "./types";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
@@ -26,8 +26,4 @@ export function createSighting(lat: number, lng: number): Promise<CurrentSightin
 
 export function confirmSighting(id: string): Promise<CurrentSighting> {
   return request(`/api/sightings/${id}/confirm`, { method: "POST" });
-}
-
-export function getWeather(): Promise<ParkWeather> {
-  return request("/api/weather");
 }
