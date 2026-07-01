@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import type { LngLatLike, StyleSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -15,6 +15,15 @@ const PARK_BOUNDS: [LngLatLike, LngLatLike] = [
 ];
 
 const MAP_STYLE = customMapStyle as unknown as StyleSpecification;
+
+function isWebglSupported(): boolean {
+  try {
+    const canvas = document.createElement("canvas");
+    return !!(canvas.getContext("webgl2") || canvas.getContext("webgl"));
+  } catch {
+    return false;
+  }
+}
 
 interface MapViewProps {
   initialCenter: { lat: number; lng: number };
@@ -37,28 +46,44 @@ export function MapView({ initialCenter, sheepPosition, sheepUncertain, userPosi
   const initialCenterRef = useRef(initialCenter);
   const tapCountRef = useRef(0);
   const tapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [mapUnavailable, setMapUnavailable] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
+    if (!isWebglSupported()) {
+      setMapUnavailable(true);
+      return;
+    }
+
     const center = initialCenterRef.current;
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style: MAP_STYLE,
-      center: [center.lng, center.lat],
-      zoom: 15.5,
-      maxBounds: PARK_BOUNDS,
-      attributionControl: false,
-      canvasContextAttributes: { preserveDrawingBuffer: true },
-    });
+    try {
+      const map = new maplibregl.Map({
+        container: containerRef.current,
+        style: MAP_STYLE,
+        center: [center.lng, center.lat],
+        zoom: 15.5,
+        maxBounds: PARK_BOUNDS,
+        attributionControl: false,
+        canvasContextAttributes: { preserveDrawingBuffer: true },
+      });
 
-    map.on("click", (event) => {
-      onMapClickRef.current?.(event.lngLat.lat, event.lngLat.lng);
-    });
+      map.on("click", (event) => {
+        onMapClickRef.current?.(event.lngLat.lat, event.lngLat.lng);
+      });
+      map.on("error", (event) => {
+        console.error("MapLibre error:", event.error);
+      });
 
-    mapRef.current = map;
+      mapRef.current = map;
+    } catch (err) {
+      console.error("Failed to initialize map:", err);
+      setMapUnavailable(true);
+      return;
+    }
+
     return () => {
-      map.remove();
+      mapRef.current?.remove();
       mapRef.current = null;
     };
   }, []);
@@ -150,6 +175,17 @@ export function MapView({ initialCenter, sheepPosition, sheepUncertain, userPosi
         .addTo(map);
     }
   }, [pendingPin]);
+
+  if (mapUnavailable) {
+    return (
+      <div className="map-view map-view--unavailable">
+        <p className="map-view__error-text">
+          Die Karte konnte nicht geladen werden.{"\n"}
+          Bitte versuch es mit einem anderen Browser oder einem Update.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="map-view">
