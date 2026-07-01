@@ -1,27 +1,11 @@
 import { useEffect, useState } from "react";
 import arrowLeftIcon from "./assets/arrow-left.svg";
 import schafIcon from "./assets/schaf-icon.svg";
-import sunIcon from "./assets/sun.svg";
-import weatherCloudIcon from "./assets/weather-cloud.svg";
-import weatherFogIcon from "./assets/weather-fog.svg";
-import weatherRainIcon from "./assets/weather-rain.svg";
-import weatherSnowIcon from "./assets/weather-snow.svg";
-import weatherStormIcon from "./assets/weather-storm.svg";
-import type { CurrentSighting, ParkWeather, ViewState, WeatherCondition } from "./types";
-
-const WEATHER_ICONS: Record<WeatherCondition, string> = {
-  clear: sunIcon,
-  cloudy: weatherCloudIcon,
-  fog: weatherFogIcon,
-  rain: weatherRainIcon,
-  snow: weatherSnowIcon,
-  storm: weatherStormIcon,
-};
+import type { CurrentSighting, ViewState } from "./types";
 
 interface BottomSheetProps {
   view: ViewState;
   sighting: CurrentSighting | null;
-  weather: ParkWeather | null;
   onConfirm: () => void;
   onNotThereAnymore: () => void;
   onWhereAreTheSheep: () => void;
@@ -42,16 +26,6 @@ function ErrorMessage({ error }: { error: string | null }) {
 
 function formatConfirmCount(count: number): string {
   return count === 1 ? "Heute von 1 Person bestätigt." : `Heute von ${count} Leuten bestätigt.`;
-}
-
-function WeatherBadge({ weather }: { weather: ParkWeather | null }) {
-  if (weather === null) return null;
-  return (
-    <div className="sheet__weather">
-      <img className="sheet__weather-icon" src={WEATHER_ICONS[weather.condition]} alt="" />
-      <span>{weather.temperatureC}°C</span>
-    </div>
-  );
 }
 
 function BackButton({ onClick }: { onClick: () => void }) {
@@ -80,20 +54,27 @@ function CollapseButton({ collapsed, onClick }: { collapsed: boolean; onClick: (
   );
 }
 
+function SheetWrapper({ back, children }: { back?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div className="sheet-wrapper">
+      {back}
+      <div className="sheet">{children}</div>
+    </div>
+  );
+}
+
 export function BottomSheet(props: BottomSheetProps) {
-  const { view, sighting, weather } = props;
+  const { view, sighting } = props;
   const [collapsed, setCollapsed] = useState(false);
 
-  // Reset to expanded whenever the view changes
   useEffect(() => { setCollapsed(false); }, [view]);
 
   const collapsible = view === "known" || view === "uncertain" || view === "unknown";
 
   if (view === "known" && sighting) {
     return (
-      <div className="sheet">
+      <SheetWrapper>
         {collapsible && <CollapseButton collapsed={collapsed} onClick={() => setCollapsed((c) => !c)} />}
-        {!collapsed && <WeatherBadge weather={weather} />}
         <div className="sheet__status">
           <div className="sheet__status-row">
             <img className="sheet__icon" src={schafIcon} alt="" />
@@ -112,15 +93,14 @@ export function BottomSheet(props: BottomSheetProps) {
             </button>
           </div>
         )}
-      </div>
+      </SheetWrapper>
     );
   }
 
   if (view === "uncertain" && sighting) {
     return (
-      <div className="sheet">
+      <SheetWrapper>
         {collapsible && <CollapseButton collapsed={collapsed} onClick={() => setCollapsed((c) => !c)} />}
-        {!collapsed && <WeatherBadge weather={weather} />}
         <div className="sheet__status">
           <div className="sheet__status-row">
             <img className="sheet__icon sheet__icon--uncertain" src={schafIcon} alt="" />
@@ -139,15 +119,14 @@ export function BottomSheet(props: BottomSheetProps) {
             </button>
           </div>
         )}
-      </div>
+      </SheetWrapper>
     );
   }
 
   if (view === "unknown") {
     return (
-      <div className="sheet">
+      <SheetWrapper>
         {collapsible && <CollapseButton collapsed={collapsed} onClick={() => setCollapsed((c) => !c)} />}
-        {!collapsed && <WeatherBadge weather={weather} />}
         <div className="sheet__status">
           <div className="sheet__status-row">
             <img className="sheet__icon sheet__icon--unknown" src={schafIcon} alt="" />
@@ -161,14 +140,13 @@ export function BottomSheet(props: BottomSheetProps) {
             </button>
           </div>
         )}
-      </div>
+      </SheetWrapper>
     );
   }
 
   if (view === "thankyou" && sighting) {
     return (
-      <div className="sheet">
-        <BackButton onClick={props.onBack} />
+      <SheetWrapper back={<BackButton onClick={props.onBack} />}>
         <div className="sheet__status">
           <div className="sheet__status-row">
             <img className="sheet__icon" src={schafIcon} alt="" />
@@ -176,14 +154,13 @@ export function BottomSheet(props: BottomSheetProps) {
           </div>
           <p className="sheet__subtitle">{formatConfirmCount(sighting.confirmCount)}</p>
         </div>
-      </div>
+      </SheetWrapper>
     );
   }
 
   if (view === "where-are-the-sheep") {
     return (
-      <div className="sheet">
-        <BackButton onClick={props.onBack} />
+      <SheetWrapper back={<BackButton onClick={props.onBack} />}>
         <div className="sheet__status">
           <div className="sheet__status-row">
             <img className="sheet__icon" src={schafIcon} alt="" />
@@ -199,14 +176,13 @@ export function BottomSheet(props: BottomSheetProps) {
             Auf Karte auswählen
           </button>
         </div>
-      </div>
+      </SheetWrapper>
     );
   }
 
   if (view === "handpick") {
     return (
-      <div className="sheet">
-        <BackButton onClick={props.onCancelHandpick} />
+      <SheetWrapper back={<BackButton onClick={props.onCancelHandpick} />}>
         <div className="sheet__status">
           <div className="sheet__status-row">
             <img className="sheet__icon" src={schafIcon} alt="" />
@@ -223,7 +199,7 @@ export function BottomSheet(props: BottomSheetProps) {
             Position bestätigen
           </button>
         </div>
-      </div>
+      </SheetWrapper>
     );
   }
 

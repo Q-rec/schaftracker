@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AboutCard } from "./AboutCard";
-import { confirmSighting, createSighting, getCurrentSighting, getWeather } from "./api";
+import { confirmSighting, createSighting, getCurrentSighting } from "./api";
 import { BottomSheet } from "./BottomSheet";
 import { DatenschutzCard } from "./DatenschutzCard";
 import { Header } from "./Header";
@@ -9,7 +9,7 @@ import { hasSeenIntro, markIntroSeen } from "./intro";
 import { LocationToggle } from "./LocationToggle";
 import { SheepConfetti } from "./SheepConfetti";
 import { DEFAULT_CENTER, MapView } from "./MapView";
-import type { CurrentSighting, OverlayView, ParkWeather, ViewState } from "./types";
+import type { CurrentSighting, OverlayView, ViewState } from "./types";
 
 function statusToView(status: CurrentSighting["status"]): ViewState {
   return status;
@@ -18,7 +18,6 @@ function statusToView(status: CurrentSighting["status"]): ViewState {
 function App() {
   const [sighting, setSighting] = useState<CurrentSighting | null>(null);
   const [view, setView] = useState<ViewState>("unknown");
-  const [weather, setWeather] = useState<ParkWeather | null>(null);
   const [userPosition, setUserPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [locationEnabled, setLocationEnabled] = useState(false);
   const [pendingPin, setPendingPin] = useState<{ lat: number; lng: number } | null>(null);
@@ -37,9 +36,6 @@ function App() {
 
   useEffect(() => {
     refreshSighting().finally(() => setInitialLoadDone(true));
-    getWeather()
-      .then((result) => setWeather(result))
-      .catch(() => setWeather(null));
     if (!hasSeenIntro()) {
       setOverlay("about");
     }
@@ -143,7 +139,7 @@ function App() {
   }, []);
 
   const sheepPosition =
-    sighting && (view === "known" || view === "uncertain" || view === "thankyou")
+    sighting && (view === "known" || view === "uncertain" || view === "thankyou" || view === "where-are-the-sheep")
       ? { lat: sighting.lat, lng: sighting.lng }
       : null;
   const initialCenter = sighting ? { lat: sighting.lat, lng: sighting.lng } : DEFAULT_CENTER;
@@ -191,7 +187,6 @@ function App() {
         <BottomSheet
           view={view}
           sighting={sighting}
-          weather={weather}
           busy={busy}
           error={error}
           handpickPinSet={pendingPin !== null}

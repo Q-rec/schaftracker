@@ -7,7 +7,7 @@ interface DatenschutzCardProps {
 export function DatenschutzCard({ onClose }: DatenschutzCardProps) {
   return (
     <div className="sheet sheet--about sheet--scrollable">
-      <button className="sheet__back" onClick={onClose}>
+      <button className="sheet__back sheet__back--inline" onClick={onClose}>
         <img className="sheet__back-icon" src={arrowLeftIcon} alt="" />
         zurück
       </button>
@@ -61,7 +61,6 @@ export function DatenschutzCard({ onClose }: DatenschutzCardProps) {
         </p>
         <ul>
           <li>OpenFreeMap (tiles.openfreemap.org) – Kartendarstellung</li>
-          <li>Open-Meteo (api.open-meteo.com) – Wetterdaten</li>
         </ul>
         <p>
           Schriftarten werden nicht von Drittanbietern geladen, sondern direkt von unserem Server ausgeliefert.

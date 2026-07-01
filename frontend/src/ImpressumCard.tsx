@@ -7,7 +7,7 @@ interface ImpressumCardProps {
 export function ImpressumCard({ onClose }: ImpressumCardProps) {
   return (
     <div className="sheet sheet--about sheet--scrollable">
-      <button className="sheet__back" onClick={onClose}>
+      <button className="sheet__back sheet__back--inline" onClick={onClose}>
         <img className="sheet__back-icon" src={arrowLeftIcon} alt="" />
         zurück
       </button>

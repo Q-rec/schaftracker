@@ -21,9 +21,3 @@ export type ViewState =
 
 export type OverlayView = "about" | "datenschutz" | "impressum" | null;
 
-export type WeatherCondition = "clear" | "cloudy" | "fog" | "rain" | "snow" | "storm";
-
-export interface ParkWeather {
-  temperatureC: number;
-  condition: WeatherCondition;
-}
