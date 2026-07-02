@@ -6,9 +6,19 @@ import '@fontsource/ibm-plex-sans/600.css'
 import '@fontsource/ibm-plex-mono/400.css'
 import './index.css'
 import App from './App.tsx'
+import { ErrorBoundary } from './ErrorBoundary.tsx'
+
+window.addEventListener('error', (event) => {
+  console.error('Unhandled error:', event.error ?? event.message)
+})
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason)
+})
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </StrictMode>,
 )
